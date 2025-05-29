@@ -7,6 +7,8 @@ st.set_page_config(page_title="Sylphi - Your Research Credibility Assistant", la
 st.title("📚 Sylphi – Your Research Credibility Assistant")
 st.write("Welcome to Sylphi! Enter a topic to find peer-reviewed sources, or paste a source title to evaluate its credibility.")
 
+import openai
+
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # Section 1: Search for Peer-Reviewed Articles
