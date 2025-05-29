@@ -12,15 +12,20 @@ st.write("Use Sylphi to locate credible academic sources and verify if a source 
 openai.api_key = st.secrets.get("OPENAI_API_KEY")
 
 # Section 1: Search for Peer-Reviewed Articles
+
+import streamlit as st
+import openai
+from urllib.parse import quote_plus
+
 st.subheader("🔍 Find Peer-Reviewed Articles")
 topic = st.text_input("Enter a topic to search academic literature (e.g., 'AI in education'):")
 
-# Define prompts BEFORE the API call
+# Define system and user prompts
 system_prompt = (
-    "You are a university research librarian helping students locate real, peer-reviewed academic sources. "
-    "Only return academic journal articles that are verifiable and have working URLs. Prefer open-access links from sites like doaj.org, pubmed.ncbi.nlm.nih.gov, eric.ed.gov, or arxiv.org. "
-    "Avoid broken links, placeholders, or guessed DOIs. Each source must be authentic and link to the full article or abstract page. "
-    "Respond in structured format as follows."
+    "You are a university research librarian helping students locate peer-reviewed academic sources. "
+    "For each suggestion, provide the article title, author(s), year, journal, a 1-2 sentence summary, "
+    "and a Google Scholar search link based on the article title. DO NOT fabricate URLs. "
+    "Use this output format:"
 )
 
 user_prompt_template = (
@@ -30,11 +35,11 @@ user_prompt_template = (
     "   Year: [Year]\n"
     "   Journal: [Journal Name]\n"
     "   Summary: [1–2 sentence summary]\n"
-    "   Link: [Working, verified URL]"
+    "   Scholar Search: Use this format: https://scholar.google.com/scholar?q=[Article Title]"
 )
 
 if topic:
-    with st.spinner("Searching scholarly databases..."):
+    with st.spinner("Finding high-quality academic articles..."):
         try:
             response = openai.chat.completions.create(
                 model="gpt-4",
@@ -43,10 +48,13 @@ if topic:
                     {"role": "user", "content": user_prompt_template.format(topic=topic)}
                 ]
             )
+            results = response.choices[0].message.content
             st.markdown("### 📝 Results:")
-            st.write(response.choices[0].message.content)
+            st.write(results)
+            st.markdown("🔗 All links above will open in Google Scholar. You can verify source availability from there.")
         except Exception as e:
             st.error(f"❌ An error occurred while contacting OpenAI: {e}")
+
 
 # Section 2: Credibility Check
 st.subheader("✅ Check Source Credibility")
