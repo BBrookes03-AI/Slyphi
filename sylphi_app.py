@@ -15,14 +15,32 @@ openai.api_key = st.secrets.get("OPENAI_API_KEY")
 st.subheader("🔍 Find Peer-Reviewed Articles")
 topic = st.text_input("Enter a topic to search academic literature (e.g., 'AI in education'):")
 
+# Define prompts BEFORE the API call
+system_prompt = (
+    "You are a university research librarian helping students locate real, peer-reviewed academic sources. "
+    "Only return academic journal articles that are verifiable and have working URLs. Prefer open-access links from sites like doaj.org, pubmed.ncbi.nlm.nih.gov, eric.ed.gov, or arxiv.org. "
+    "Avoid broken links, placeholders, or guessed DOIs. Each source must be authentic and link to the full article or abstract page. "
+    "Respond in structured format as follows."
+)
+
+user_prompt_template = (
+    "List 3 peer-reviewed academic articles about {topic}. For each, follow this format:\n"
+    "1. Title: [Article Title]\n"
+    "   Author(s): [Name(s)]\n"
+    "   Year: [Year]\n"
+    "   Journal: [Journal Name]\n"
+    "   Summary: [1–2 sentence summary]\n"
+    "   Link: [Working, verified URL]"
+)
+
 if topic:
     with st.spinner("Searching scholarly databases..."):
         try:
             response = openai.chat.completions.create(
                 model="gpt-4",
                 messages=[
-                    {"role": "system", "content": "You are a university research librarian helping students locate peer-reviewed research."},
-                    {"role": "user", "content": f"List 3 peer-reviewed academic articles about {topic}. For each, give the title, author(s), year, journal, and a short summary."}
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt_template.format(topic=topic)}
                 ]
             )
             st.markdown("### 📝 Results:")
