@@ -15,7 +15,7 @@ topic = st.text_input("Enter your topic (e.g., 'AI in education'):")
 
 if topic:
     with st.spinner("Searching academic databases..."):
-        response = openai.ChatCompletion.create(
+        response = openai.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a university research librarian."},
@@ -31,7 +31,7 @@ source_title = st.text_area("Paste the title or link of a source to evaluate its
 
 if source_title:
     with st.spinner("Evaluating source..."):
-        response = openai.ChatCompletion.create(
+        response = openai.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are an academic integrity expert."},
@@ -49,7 +49,7 @@ citation_style = st.radio("Select Citation Style:", ["APA", "MLA"])
 if citation_input:
     with st.spinner("Formatting citation..."):
         citation_prompt = f"Format the following source in {citation_style} style: {citation_input}"
-        response = openai.ChatCompletion.create(
+        response = openai.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a citation formatting expert."},
