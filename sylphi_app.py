@@ -1,62 +1,71 @@
 
 import streamlit as st
 import openai
+import os
 
-st.set_page_config(page_title="Sylphi - Your Research Credibility Assistant", layout="centered")
-
+# Setup the page
+st.set_page_config(page_title="Sylphi – Research Credibility Assistant", layout="centered")
 st.title("📚 Sylphi – Your Research Credibility Assistant")
-st.write("Welcome to Sylphi! Enter a topic to find peer-reviewed sources, or paste a source title to evaluate its credibility.")
+st.write("Use Sylphi to locate credible academic sources and verify if a source is peer-reviewed.")
 
-import openai
-
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+# Securely load the API key
+openai.api_key = st.secrets.get("OPENAI_API_KEY")
 
 # Section 1: Search for Peer-Reviewed Articles
 st.subheader("🔍 Find Peer-Reviewed Articles")
-topic = st.text_input("Enter your topic (e.g., 'AI in education'):")
+topic = st.text_input("Enter a topic to search academic literature (e.g., 'AI in education'):")
 
 if topic:
-    with st.spinner("Searching academic databases..."):
-        response = openai.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are a university research librarian."},
-                {"role": "user", "content": f"List 3 peer-reviewed academic articles about {topic}. For each, give the title, author(s), year, journal, and a 1-sentence summary."}
-            ]
-        )
-        st.markdown("### 📝 Search Results:")
-        st.write(response.choices[0].message.content)
+    with st.spinner("Searching scholarly databases..."):
+        try:
+            response = openai.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": "You are a university research librarian helping students locate peer-reviewed research."},
+                    {"role": "user", "content": f"List 3 peer-reviewed academic articles about {topic}. For each, give the title, author(s), year, journal, and a short summary."}
+                ]
+            )
+            st.markdown("### 📝 Results:")
+            st.write(response.choices[0].message.content)
+        except Exception as e:
+            st.error(f"❌ An error occurred while contacting OpenAI: {e}")
 
 # Section 2: Credibility Check
 st.subheader("✅ Check Source Credibility")
-source_title = st.text_area("Paste the title or link of a source to evaluate its credibility:")
+source_title = st.text_area("Paste a source title or link to evaluate credibility:")
 
 if source_title:
-    with st.spinner("Evaluating source..."):
-        response = openai.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are an academic integrity expert."},
-                {"role": "user", "content": f"Evaluate the credibility of this source: {source_title}. Is it peer-reviewed? Who is the author? Is it a scholarly publication? Return your analysis in 3-4 bullet points."}
-            ]
-        )
-        st.markdown("### 🔎 Credibility Report:")
-        st.write(response.choices[0].message.content)
+    with st.spinner("Evaluating source credibility..."):
+        try:
+            response = openai.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": "You are an academic integrity expert evaluating sources."},
+                    {"role": "user", "content": f"Evaluate the credibility of this source: {source_title}. Respond with whether it's peer-reviewed, author credentials, publication quality, and citation practices."}
+                ]
+            )
+            st.markdown("### 🔍 Credibility Report:")
+            st.write(response.choices[0].message.content)
+        except Exception as e:
+            st.error(f"❌ An error occurred while evaluating the source: {e}")
 
-# Section 3: Citation Helper
-st.subheader("📌 Generate APA/MLA Citation")
-citation_input = st.text_area("Enter article details (title, author, journal, year):")
-citation_style = st.radio("Select Citation Style:", ["APA", "MLA"])
+# Section 3: Citation Generator
+st.subheader("📌 Format APA/MLA Citation")
+citation_input = st.text_area("Paste source details (title, author, journal, year):")
+citation_style = st.radio("Select citation style:", ["APA", "MLA"])
 
 if citation_input:
-    with st.spinner("Formatting citation..."):
-        citation_prompt = f"Format the following source in {citation_style} style: {citation_input}"
-        response = openai.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are a citation formatting expert."},
-                {"role": "user", "content": citation_prompt}
-            ]
-        )
-        st.markdown("### 🧾 Citation Output:")
-        st.code(response.choices[0].message.content)
+    with st.spinner("Formatting your citation..."):
+        try:
+            citation_prompt = f"Format this in {citation_style} style: {citation_input}"
+            response = openai.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": "You are a citation formatting expert."},
+                    {"role": "user", "content": citation_prompt}
+                ]
+            )
+            st.markdown("### 🧾 Citation Output:")
+            st.code(response.choices[0].message.content)
+        except Exception as e:
+            st.error(f"❌ An error occurred while generating the citation: {e}")
